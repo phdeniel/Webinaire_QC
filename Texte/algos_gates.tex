@@ -1,0 +1,196 @@
+\section{Algorithmes quantiques}
+
+\begin{frame}{Oracles}
+Let  $f$ be an boolean function ~: $f: \{0,1\} \rightarrow \{0,1\} $. 
+\newline \newline
+ $f$ is integrated in a quantum circuit as a black box named an \textbf{oracle}. \newline
+An oracle has to be linear and inversible
+\begin{itemize}
+    \item the $n$ first qubits carry input data and will not be changed
+    \item the other qubits, or \textbf{acillae}, are XOR-d with the result of $f$ on input data
+\end{itemize}
+\begin{center}
+ \begin{quantikz}[thin lines]
+    & \ket{x} & & \qw & \gate[wires=2]{O_f} & \qw & \qw & \ket{x} \\
+    & \ket{y} & & \qw &                   & \qw & \qw & \ket{y \oplus f(x)}
+\end{quantikz}
+\end{center}
+The same schema operates on $f: \{0,1\}^m \rightarrow \{0,1\}^n, m, n \in \mathbb{N}^* $ \newline
+We obtain the oracle $O_f$ pn $m+n$ qubits~~: $m$ inputqubits and $n$ ancillae 
+\end{frame}
+
+\begin{frame}{Deustch-Josza algorithm}
+Let $f$ be a boolean function ~: $f: \{0,1\} \rightarrow \{0,1\} $, either constant or uniform. \newline
+In standard HPC, 2 runs of $f$ are required, while QC only invokes $O_f$ once. 
+\begin{center}
+ \begin{quantikz}[thin lines]
+    & \ket{0} & & \qw & \qw      & \gate{H} & \gate[wires=2]{O_f} & \gate{H} & \meter{} & \qw & \qw  \\
+    & \ket{0} & & \qw & \gate{X} & \gate{H} &                     & \qw      & \qw      & \qw & \qw                        
+\end{quantikz}
+\end{center}
+Final state is
+\begin{equation*}
+    \ket{\Psi_{final}}{\frac{\ket{0}+(-1)^{f(0)+f(1)}\ket{1}}{\sqrt{2}}}\otimes \ket{-}    
+\end{equation*}
+\begin{itemize}
+    \item if $f$ is constant, $f(0) = f(1)$ alors $\ket{\phi_2} =  
+                    {\frac{ (\ket{0} + \ket{1})( \ket{0} - \ket{1} ) }{2}} = \ket{+}\ket{-}$
+    \item if $f$ is uniform, $f(0) \neq f(1)$ alors $\ket{\phi_2} = 
+                    {\frac{ (\ket{0} - \ket{1})( \ket{0} - \ket{1} ) }{2}} = \ket{-}\ket{-}$                
+\end{itemize}
+by mesuring le first qubit, we get $\ket{+}$ or $\ket{1}$ depending on the properties of $f$. \newline \newline
+If a hat contains two balls, each can be back or white, a single shot of Deutsch-Josza tells you if the two balls have the
+same colours or different colours. It can be generalised to $n$ qubits.
+\end{frame}
+
+\begin{frame}{Bernstein-Vazirini algorithm}
+Knowing  $s$ a string of $n$ bits,  we build $f$ by
+\begin{equation*}
+    \begin{split}
+        f & : \{0,1\}^n \rightarrow \{0,1\} \\
+          & x \mapsto s \cdot x  = {s_1}{x_1} \oplus {s_2}{x_2} \oplus \cdots \oplus {s_n}{x_n} =
+                        {s_1}{x_1} + \cdots + {s_n}{x_n} \textrm{ modulo 2} \\
+    \end{split}
+\end{equation*}    
+We know $f$, can we find $s$ ?
+\newline \newline
+With a classical approach, at leat $2^{n-1}$ shots should be done in order to build an independant and simple linear
+system of equations to be solved to find $s$.
+\end{frame}
+
+\begin{frame}{Bernstein-Vazirini's circuit}
+\begin{center}
+    \begin{tikzpicture}
+        \node[scale=0.8] {
+        \begin{quantikz}[thin lines]
+        & \ket{0}\otimes^n & & \qw & \qwbundle{n} & \gate{H\otimes n} & \gate[wires=2]{O_f} & \qw & \qwbundle{n} & \qw \\
+        & \ket{0}          & & \qw & \gate{X}     & \gate{H}          &                     & \qw      & \qw     & \qw 
+        \end{quantikz}            
+        };
+    \end{tikzpicture}
+\end{center}
+will lead to state
+\begin{equation*}
+   \ket{\psi} =  \frac{1}{2^n} \sum_{y=0}^{2^{n-1}} \Bigl[\sum_{x=0}^{2^n -1} (-1)^{f(x)+x\cdot y}\Bigr]\ket{y} 
+\end{equation*}
+Each$\ket{y}$ will have amplitude $\alpha_y = \frac{1}{2^n} \sum_{x=0}^{2^n -1} (-1)^{f(x)+x\cdot y} $ \newline
+When $y=s$, $\alpha_s = f(x)+x.s = x.s + x.s = 2x.s$ meaning that $\alpha_s = 2^n / 2^n = 1$ \newline
+As the sum of the square of the module of each $\alpha_y$ is 1, all coefficients are null if $y \neq s$, this means 
+that $\ket{\psi}= \ket{s}$ 
+\newline
+We know $s$ with \textbf{a single} invocation of the oracle. 
+\end{frame}
+
+\begin{frame}{Shor algorithm - raw idea}
+Let $N$ be a very large integer, written as the priduct of 2 factors... What are those factors?\newline \newline
+Let $a$ and $r$ be 2 integers such as  $a^r \equiv 1 [N]$ so $a^r -1 \equiv 0 [N]$ \newline \newline
+If $r$ is even, then $r = 2p$ and  $a^{2p} - 1 = (a^p-1)(a^p+1) \equiv 0 [N]$ \newline \newline
+So, it exists an integre $k$ such as $(a^p-1)(a^p+1)=kN$ \newline \newline
+Computing the largest common divisor of $N$, $(a^p-1)$, $(a^p+1)$ identifies a factor of $N$ \newline \newline
+This last operation is easy with HPC (for example by using Euclide algorithm). 
+\end{frame}
+
+\begin{frame}{Algorithme de Shor - period search}
+Knowing $N$, for all integers $a$ lower than  $\sqrt{N}$ we build the function
+\begin{equation*}
+    f_a: k \mapsto a^k \textrm{ modulo } N
+\end{equation*}
+If we find an integer $r$ such as $f_a(r) = a^k = 1$ then $f_a(p+r) = a^p a^r = 1$ and then $f_a$ est r-periodic. 
+\newline \newline
+The quantum part of the algorithm
+\begin{itemize}
+    \item takes a value $a$
+    \item identify if $f_a$ has a period $r$, if $r$ is even, we won the price!
+\end{itemize}
+This part uses
+\begin{itemize}
+    \item a quantum circuit inspired bu the Simon algorithm, which find the period of a boolean function
+    \item Quantum Fourier Transform (QFT) or Quantum implementation of Discrete Fourier Transform.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Reminder- Discrete Fourier Transform (DFT) - Definition}
+Classical Fourier transform associe a function $f$ with
+\begin{equation*}
+    \hat{f}: \mathbb{R} \rightarrow{} \mathbb{C}, 
+    \hat{f}(x) = \int_{-\infty}^{+\infty} f(x) e^{-ixy}  \,dy
+\end{equation*}
+sometimes written with an explicity "frequency" variable
+\begin{equation*}
+    \hat{f}(\nu) = \int_{-\infty}^{+\infty} f(t) e^{-2i\pi \nu t}  \,dt
+\end{equation*}
+If $(s_n)_{0\le n < N}$ is a seri of $N$ values, we can define the discrete Fourier transform by writting, 
+$(\hat{s}_n)_{0\le n < N}$ comme la suite de valeurs
+\begin{equation*}
+    0 \le n < N, \hat{s}_n = \sum_{k=0}^{N-1}s_k.e^{-2i\pi\frac{kn}{N}}
+\end{equation*}
+\end{frame}
+
+\begin{frame}{Reminder - Discrete Fourier Transform (DFT) - Vandermonde Matrix}
+The DFT can be expressed as matrix, known as the Vandermonde matrix
+    \begin{equation*}
+    QF_n = \frac{1}{\sqrt{N}} W_N = \frac{1}{\sqrt{N}} 
+    \begin{pmatrix}
+        1       & 1                 & 1                  & \cdot  & 1                        \\
+        1       & \omega_{N}       & \omega_{N}^2        & \cdots & \omega_{N}^{N-1}         \\
+        \vdots  & \vdots           & \ddots              & \vdots & \ddots                   \\
+        1       & \omega_{N}^{N-1} & \omega_{N}^{2(N-1)} & \cdots & \omega_{N}^{(N-1)(N-1)}  \\
+    \end{pmatrix}
+\end{equation*}
+\textbf{Example~:~}with 3 qubits, we'll get the following $8 \times 8$ matrix 
+\begin{equation*}
+    QF_8 = \frac{1}{\sqrt{8}}\begin{pmatrix}
+        1 & 1        & 1        & 1        &  1       & 1        & 1        & 1        \\
+        1 & \omega   & \omega^2 & \omega^3 & \omega^4 & \omega^5 & \omega^6 & \omega^7 \\
+        1 & \omega^2 & \omega^4 & \omega^6 & 1        & \omega^1 & \omega^4 & \omega^6 \\
+        1 & \omega^3 & \omega^6 & \omega   & \omega^4 & \omega^7 & \omega^2 & \omega^5 \\
+        1 & \omega^4 & 1        & \omega^4 & 1        & \omega^4 & 1        & \omega^4 \\
+        1 & \omega^5 & \omega^2 & \omega^7 & \omega^4 & \omega   & \omega^6 & \omega^3 \\
+        1 & \omega^6 & \omega^4 & \omega^2 & 1        & \omega^6 & \omega^4 & \omega^2 \\
+        1 & \omega^7 & \omega^6 & \omega^5 & \omega^4 & \omega^3 & \omega^2 & \omega^1 \\
+    \end{pmatrix} \textrm{ avec } \omega = e^{\frac{2i\pi}{8}}
+\end{equation*}
+This matrix is unitary. 
+\end{frame}
+
+\begin{frame}{QFT Circuit}
+The circuit that implement the Vandermonde matrix is based on this mathematical property\newline \newline
+\begin{equation*}
+    QF_n \times \ket{k} =  \frac{1}{\sqrt{2^n}} \sum_{j=0}^{2^{n}-1} e^{-2i\pi\frac{kj}{2^n}} \ket{j}
+                        =  \frac{1}{\sqrt{2^n}} \bigotimes_{j=0}^{n}(\ket{0} + e^{2i\pi\frac{k}{2^j}} \ket{1} )
+\end{equation*}
+\begin{center}
+\begin{tikzpicture}
+   \node[scale=0.8] { 
+\begin{quantikz}
+     & \qw      & \ctrl{4}& \qw           & \qw    & \qw & \qw        & \qw      & \ctrl{3}   & \qw        & \qw
+     & \qw & \qw            & \qw  & \qw  & \qw      & \ctrl{1} & \gate{H} & \qw \\
+     & \qw      & \qw     & \ctrl{3}      & \qw    & \qw & \qw        & \qw      & \qw        & \ctrl{2}   & \qw
+     & \qw & \qw            & \qw  & \qw  & \gate{H} & \gate{R_2} & \qw & \qw \\
+              &          & \vdots     &            & \vdots &     &            &          &            &            &  
+     &     & \vdots         &      &      &          &           \\
+     & \qw      & \qw        & \qw        & \qw    & \qw & \ctrl{1}   & \gate{H} & \gate{R_2} & \gate{R_3} & \cdots  
+     & \qw & \gate{R_{n-1}} & \qw  & \qw  & \qw      & \qw  & \qw  & \qw   \\
+     & \gate{H} & \gate{R_2} & \gate{R_3} & \cdots & \qw & \gate{R_n} & \qw      & \qw        & \qw        & \qw 
+    & \qw  & \qw            & \qw  & \qw  & \qw & \qw & \qw & \qw
+\end{quantikz}
+    };
+\end{tikzpicture}
+\end{center}
+\end{frame}
+
+\begin{frame}{Quantum implementation of the Shor algorithm}
+The quantum part is written as
+\begin{center}
+ \begin{quantikz}
+  & \ket{0} & \gate{H} & \gate[wires=6]{O_f} & \qw & \qw      & \gate[wires=3]{QF_N^{-1}} & \qw & \meter{} & \qw \\ 
+  & \ket{0} & \gate{H} &                     & \qw & \qw      &                           & \qw & \meter{} & \qw \\
+  & \ket{0} & \gate{H} &                     & \qw & \qw      &                           & \qw & \meter{} & \qw \\             
+  & \ket{0}   & \qw    &                     & \qw & \meter{} & \qw                       & \qw & \qw      & \qw \\
+  & \ket{0}   & \qw    &                     & \qw & \meter{} & \qw                       & \qw & \qw      & \qw \\
+  & \ket{0}   & \qw    &                     & \qw & \meter{} & \qw                       & \qw & \qw      & \qw  
+\end{quantikz}
+\end{center}   
+Where $O_f$ is an oracle that implements $f(x) = a^x$
+\end{frame}
+

@@ -1,0 +1,50 @@
+\documentclass[aspectratio=1610,10pt,dvipsnames]{beamer}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[varg]{txfonts}
+\usepackage[french]{babel}
+\usepackage{blochsphere}
+\usepackage{tikz}
+\usetikzlibrary{quantikz}
+\usepackage{moreverb}
+\usepackage{url} 
+
+\usetheme{Ilmenau}
+%%\usetheme{Copenhagen}
+%%\usetheme{PaloAlto}
+%%\usetheme{Antibes}
+%%\usetheme{Warsaw}
+
+\setbeamercovered{transparent}
+\setbeamertemplate{footline}[frame number]
+%%\usecolortheme[named=green]{structure}
+
+\addtobeamertemplate{footline}{\insertframenumber/\inserttotalframenumber}
+
+\title{Quantum Computing: a quick introduction}
+\date{2024}
+\institute{CEA}
+\author{Philippe DENIEL (philippe.deniel@cea.fr)}
+
+\AtBeginSection[]
+{
+%%\begin{frame}[plain]
+%%%        \usebeamertemplate{section page}
+%%%\end{frame}
+\begin{frame}{Plan}
+\tableofcontents[currentsection]
+\end{frame}
+}
+
+\begin{document}
+\frame{\titlepage}
+
+\input{Texte/main}
+\input{Texte/phyq}
+\input{Texte/gates}
+\input{Texte/algos_gates}
+\input{Texte/analogic}
+\input{Texte/misc}
+\input{Texte/HPC-QC}
+\input{Texte/conclusion}
+\end{document}

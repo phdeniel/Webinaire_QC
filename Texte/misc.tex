@@ -1,0 +1,27 @@
+\section{Other QC related topics}
+
+\begin{frame}{Post Quantum Cryptography}
+Post Quantum Cryptography aims to provide QC-resistant cryptography
+\begin{itemize}
+    \item Shor's algorithm breaks RSA
+    \item Quantum Cryptography is based on quantum phenomenons (quantum collapse, entanglement)
+    \item actual experiments are shown that quantum cryptography can be used at very large scale 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Implementing Post Quantum Cryptography}
+Things are quite simple, even simpler than classical ciphering
+\begin{itemize}
+    \item "flying qubits" (photons) are used to carry information between actors
+    \item a superposed and entangled state is build, Alice and Bob each own half of it
+    \item le first observer collapses the whose superposed and entangled state
+    \item Because of quantum physics, Alice and Bob will observe the same result (or correlated result), Both know what
+    the other one has observed. 
+    \item Alice and Bob use that information to build a sgared secret
+\end{itemize}
+Once a shared secret is obtained, standard Cryptography algorithms are used. Very simple things, such as ciphering the 
+message with a XOR operator are efficient. \newline \newline
+If an intruder (Eve!) wants to do a MIM attack, it will have an impact that can be detected. It has been demonstrated
+that its probably of staying invisible exponentially decreased with the number of involved qubits.
+\end{frame}
+
